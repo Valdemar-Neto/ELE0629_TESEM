@@ -4,7 +4,7 @@ Repositorio utilizado para o versionamento de atividades realizadas durante a di
 
 ## Stack Utilizada
 
-- `C++`
+- `C`
 - `FreeRTOS`
 - `ESP IDF`
 
