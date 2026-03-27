@@ -6,5 +6,6 @@
     "--query-driver=**",
     "--compile-commands-dir=c:\\Users\\valld\\Documents\\Universidade\\TESEM\\ELE0629_TESEM\\Atividade_02\\atv_02\\build"
   ],
-  "idf.currentSetup": "C:\\Users\\valld\\esp\\v5.5\\esp-idf"
+  "idf.currentSetup": "C:\\Users\\valld\\esp\\v5.5\\esp-idf",
+  "idf.portWin": "COM9"
 }
