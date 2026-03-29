@@ -19,7 +19,7 @@ void vMonitorTask(void *pvParameters)
 {
     char buffer[1024]; 
 
-    while (1)
+    for(;;)
     {
         TaskStatus_t *pxTaskStatusArray;
         UBaseType_t uxArraySize, x;
@@ -111,4 +111,6 @@ void vMonitorTask(void *pvParameters)
 
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
+
+    vTaskDelete(NULL);
 }
