@@ -10,7 +10,7 @@ void vMonitorTask( void *pvParameters );
 void app_main(void)
 {
 
-    xTaskCreatePinnedToCore(vMonitorTask, "MonitorTask", 10000, NULL, 5, NULL, 0);
+    xTaskCreate(vMonitorTask, "MonitorTask", 10000, NULL, 5, NULL);
     
 }
 

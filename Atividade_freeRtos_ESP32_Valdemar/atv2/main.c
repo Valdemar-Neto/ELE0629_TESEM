@@ -4,7 +4,7 @@
 #include "esp_log.h"
 #include "esp_timer.h"
 
-#define DURACAO 1000000 // 1 segundos o teste
+#define DURACAO 1000000 // 10 segundos o teste
 
 
 void task1(void *parameters);
