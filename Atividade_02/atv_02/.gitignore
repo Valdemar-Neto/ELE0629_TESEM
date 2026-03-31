@@ -15,7 +15,8 @@
 
 # Log files
 *.log
-
+* .zip # For any zipped artifacts or logs
+* .pdf # For any generated documentation or reports
 # Build artifacts and directories
 **/build/
 build/
