@@ -4,7 +4,7 @@
 #include "esp_log.h"
 #include "esp_timer.h"
 
-#define DURACAO 1000000 // 10 segundos o teste
+#define DURACAO 1000000 // 1 segundos o teste
 
 
 void task1(void *parameters);
@@ -23,9 +23,9 @@ double media, percentual;
 
 void app_main(void)
 {
-    int64_t heap_size = xPortGetFreeHeapSize();
+    //int64_t heap_size = xPortGetFreeHeapSize();
     time_init = esp_timer_get_time();
-    ESP_LOGI("Main", "Free heap size: %d bytes", heap_size);
+    //ESP_LOGI("Main", "Free heap size: %d bytes", heap_size);
     xTaskCreatePinnedToCore(task1, "Task 1", 2048, NULL, 2, NULL, 0);
     xTaskCreatePinnedToCore(task2, "Task 2", 2048, NULL, 2, NULL, 0);
 }
@@ -36,11 +36,11 @@ void task1(void *parameters)
     {
 
         if((esp_timer_get_time()-time_init)>DURACAO){
-            break;
+           break;
         }
         time_task1 = esp_timer_get_time();
-        ESP_LOGI("Task 1", "Task 1 is running at time: %lld", time_task1);
-        vTaskDelay(100/portTICK_PERIOD_MS);
+        /*ESP_LOGI("Task 1", "Task 1 is running at time: %lld", time_task1);*/
+        vTaskDelay(10/portTICK_PERIOD_MS);
     }
 
     vTaskDelete(NULL);
@@ -52,7 +52,7 @@ void task2(void *parameters)
     {
 
         if((esp_timer_get_time() - time_init ) > DURACAO){
-            break;
+           break;
         }
 
 
@@ -63,7 +63,7 @@ void task2(void *parameters)
         count++;
 
 
-        ESP_LOGI("Task 2", "Task 2 is running at time: %lld", time_task2);
+        /*ESP_LOGI("Task 2", "Task 2 is running at time: %lld", time_task2);*/
         vTaskDelay(10/portTICK_PERIOD_MS);
     }
 
