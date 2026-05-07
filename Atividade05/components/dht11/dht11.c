@@ -97,7 +97,7 @@ esp_err_t dht11_init(dht11_handle_t *handle, const dht11_config_t *config)
 }
 
 /* Defina como 1 para testar sem o sensor físico */
-#define DHT11_MOCK_ENABLE 1
+#define DHT11_MOCK_ENABLE 0
 
 esp_err_t dht11_read(dht11_handle_t *handle, dht11_data_t *data)
 {

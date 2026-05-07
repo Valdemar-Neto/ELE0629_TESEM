@@ -11,7 +11,7 @@
  *    Consumidor : Task_Logger  (contínua, drena qLog → SPIFFS)
  *    Sob demanda: Task_Serial  (acorda via ISR GPIO0, imprime UART)
  *
- * @author  ELE0629 — Tópicos Especiais em Sistemas Embarcados — UFRN
+ * @author  Valdemar Neto
  * @date    2026
  */
 
@@ -28,27 +28,23 @@
 extern "C" {
 #endif
 
-/* =========================================================
- * 1. CONFIGURAÇÕES GERAIS (ajustáveis via Kconfig / #define)
- * ========================================================= */
+/* 1. CONFIGURAÇÕES GERAIS (ajustáveis via Kconfig / #define) */
 
-#define SENSOR_TIMER_PERIOD_MS   500    /**< Período do esp_timer da Task_Sensores (ms) */
-#define STATUS_PERIOD_MS        2000    /**< Período de coleta da Task_Status (ms)       */
-#define QLOG_LENGTH               20    /**< Capacidade máxima da fila qLog              */
-#define SPIFFS_BASE_PATH      "/spiffs" /**< Ponto de montagem do SPIFFS                 */
-#define LOG_FILE_PATH   "/spiffs/Log.txt"    /**< Arquivo de log geral                  */
-#define STATUS_FILE_PATH "/spiffs/Status.txt"/**< Arquivo de status do sistema           */
-#define DHT11_GPIO_PIN             4    /**< Pino GPIO do DHT11                          */
-#define BUTTON_GPIO_PIN            0    /**< Pino GPIO do botão (ISR)                    */
-#define VCC_ADC_CHANNEL            0    /**< Canal ADC para leitura de Vcc               */
-#define HEAP_WARN_THRESHOLD    10240    /**< Heap mínimo antes de gerar WARN (bytes)     */
-#define STACK_WARN_THRESHOLD     100    /**< highWaterMark mínimo antes de ERROR (words) */
-#define SENSOR_MAX_ERRORS          3    /**< Falhas consecutivas antes de ERROR crítico  */
-#define SPIFFS_WARN_FREE_KB        4    /**< Espaço livre mínimo no SPIFFS antes de WARN */
+#define SENSOR_TIMER_PERIOD_MS   500    /* Período do esp_timer da Task_Sensores (ms) */
+#define STATUS_PERIOD_MS        2000    /* Período de coleta da Task_Status (ms)       */
+#define QLOG_LENGTH               20    /* Capacidade máxima da fila qLog              */
+#define SPIFFS_BASE_PATH      "/spiffs" /* Ponto de montagem do SPIFFS                 */
+#define LOG_FILE_PATH   "/spiffs/Log.txt"    /* Arquivo de log geral                  */
+#define STATUS_FILE_PATH "/spiffs/Status.txt"/* Arquivo de status do sistema           */
+#define DHT11_GPIO_PIN             4    /* Pino GPIO do DHT11                          */
+#define BUTTON_GPIO_PIN            0    /* Pino GPIO do botão (ISR)                    */
+#define VCC_ADC_CHANNEL            0    /* Canal ADC para leitura de Vcc               */
+#define HEAP_WARN_THRESHOLD    10240    /* Heap mínimo antes de gerar WARN (bytes)     */
+#define STACK_WARN_THRESHOLD     100    /* highWaterMark mínimo antes de ERROR (words) */
+#define SENSOR_MAX_ERRORS          3    /* Falhas consecutivas antes de ERROR crítico  */
+#define SPIFFS_WARN_FREE_KB        4    /* Espaço livre mínimo no SPIFFS antes de WARN */
 
-/* =========================================================
- * 2. ENUMERAÇÃO DE NÍVEIS DE LOG
- * ========================================================= */
+/* 2. ENUMERAÇÃO DE NÍVEIS DE LOG */
 
 /**
  * @brief Níveis de classificação de eventos para o DataLogger.
@@ -67,9 +63,7 @@ typedef enum {
     LOG_STATUS,
 } log_level_t;
 
-/* =========================================================
- * 3. ESTRUTURA DE ENTRADA DE LOG  (trafega na fila qLog)
- * ========================================================= */
+/* 3. ESTRUTURA DE ENTRADA DE LOG  (trafega na fila qLog) */
 
 /**
  * @brief Entrada de log — unidade de comunicação entre produtores e Task_Logger.
@@ -87,9 +81,7 @@ typedef struct {
     char         message[128]; /**< Texto do evento, ex: "Temp=25C Umid=60% Vcc=3.3V" */
 } log_entry_t;
 
-/* =========================================================
- * 4. ESTRUTURA DE STATUS DO SISTEMA  (Task_Status)
- * ========================================================= */
+/* 4. ESTRUTURA DE STATUS DO SISTEMA  (Task_Status) */
 
 /**
  * @brief Snapshot do estado do sistema coletado pela Task_Status a cada 2 s.
@@ -117,18 +109,14 @@ typedef struct {
     uint32_t  reset_reason;         /**< Código de reset — esp_reset_reason_t                */
 } system_status_t;
 
-/* =========================================================
- * 5. VARIÁVEIS GLOBAIS DE SINCRONIZAÇÃO
- *    (definidas em rtos.c, declaradas extern aqui)
- * ========================================================= */
+/* 5. VARIÁVEIS GLOBAIS DE SINCRONIZAÇÃO
+ *    (definidas em rtos.c, declaradas extern aqui) */
 
 extern QueueHandle_t      qLog;          /**< Fila principal: produtores → Task_Logger        */
 extern SemaphoreHandle_t  mutex_log;     /**< Mutex: protege acesso a Log.txt e Status.txt    */
 extern TaskHandle_t       h_task_serial; /**< Handle da Task_Serial para xTaskNotifyFromISR   */
 
-/* =========================================================
- * 6. PROTÓTIPOS — funções públicas do componente RTOS
- * ========================================================= */
+/* 6. PROTÓTIPOS — funções públicas do componente RTOS */
 
 /**
  * @brief Inicializa todo o sistema DataLogger.

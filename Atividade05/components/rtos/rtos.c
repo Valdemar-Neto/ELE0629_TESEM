@@ -31,32 +31,24 @@
 #include "rtos.h"
 #include "dht11.h"
 
-/* =========================================================
- * TAGS DE LOG (ESP_LOGI/W/E interno ao componente)
- * ========================================================= */
+/* TAGS DE LOG  */
 static const char *TAG_MAIN    = "RTOS_INIT";
 static const char *TAG_SENSOR  = "SENSOR";
 static const char *TAG_STATUS  = "STATUS";
 static const char *TAG_LOGGER  = "LOGGER";
 static const char *TAG_SERIAL  = "SERIAL";
 
-/* =========================================================
- * VARIÁVEIS GLOBAIS DE SINCRONIZAÇÃO
- * ========================================================= */
+/* VARIÁVEIS GLOBAIS DE SINCRONIZAÇÃO */
 QueueHandle_t      qLog          = NULL;
 SemaphoreHandle_t  mutex_log     = NULL;
 TaskHandle_t       h_task_serial = NULL;
 
-/* =========================================================
- * VARIÁVEIS INTERNAS
- * ========================================================= */
+/* VARIÁVEIS INTERNAS */
 static dht11_handle_t    s_dht11;          /* handle do driver DHT11              */
 static esp_timer_handle_t s_sensor_timer;  /* esp_timer que dispara Task_Sensores */
 static adc_oneshot_unit_handle_t s_adc;    /* handle do ADC oneshot               */
 
-/* =========================================================
- * UTILITÁRIOS INTERNOS
- * ========================================================= */
+/* UTILITÁRIOS INTERNOS */
 
 /**
  * @brief Constrói e enfileira uma log_entry_t na qLog.
@@ -104,9 +96,7 @@ static const char *level_str(log_level_t l)
     }
 }
 
-/* =========================================================
- * ISR — BOTÃO GPIO0
- * ========================================================= */
+/* ISR — BOTÃO GPIO0 */
 
 /**
  * @brief ISR do botão: notifica Task_Serial via xTaskNotifyFromISR.
@@ -121,9 +111,7 @@ static void IRAM_ATTR gpio_isr_handler(void *arg)
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
-/* =========================================================
- * TASK_SENSORES — callback do esp_timer
- * ========================================================= */
+/* TASK_SENSORES — callback do esp_timer  */
 
 /**
  * @brief Callback do esp_timer disparado a cada 500 ms.
@@ -158,7 +146,7 @@ static void sensor_timer_callback(void *arg)
         int raw = 0;
         float vcc = 3.3f; /* fallback se ADC falhar */
         if (adc_oneshot_read(s_adc, VCC_ADC_CHANNEL, &raw) == ESP_OK) {
-            /* ESP32: resolução 12 bits, referência ~3.3 V */
+            /* ESP32: resolução 12 bits, referência 3.3 V */
             vcc = (raw / 4095.0f) * 3.3f;
         }
 
@@ -215,9 +203,7 @@ static void sensor_timer_callback(void *arg)
     }
 }
 
-/* =========================================================
- * TASK_STATUS
- * ========================================================= */
+/* TASK_STATUS  */
 
 /**
  * @brief Coleta estado completo do sistema a cada 2 s e envia para qLog.
@@ -338,9 +324,7 @@ static void task_status(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-/* =========================================================
- * TASK_LOGGER
- * ========================================================= */
+/*  TASK_LOGGER  */
 
 /**
  * @brief Consumidor da fila qLog — grava entradas em Log.txt ou Status.txt.
@@ -426,9 +410,7 @@ static void task_logger(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-/* =========================================================
- * TASK_SERIAL
- * ========================================================= */
+/* TASK_SERIAL */
 
 /**
  * @brief Aguarda notificação da ISR do botão GPIO0 e imprime os logs na UART.
@@ -538,9 +520,7 @@ static void task_serial(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-/* =========================================================
- * INICIALIZAÇÃO — SPIFFS
- * ========================================================= */
+/* INICIALIZAÇÃO — SPIFFS */
 
 static esp_err_t spiffs_init(void)
 {
@@ -565,9 +545,7 @@ static esp_err_t spiffs_init(void)
     return ESP_OK;
 }
 
-/* =========================================================
- * INICIALIZAÇÃO — ADC
- * ========================================================= */
+/*  INICIALIZAÇÃO ADC */
 
 static esp_err_t adc_init(void)
 {
@@ -585,9 +563,7 @@ static esp_err_t adc_init(void)
     return adc_oneshot_config_channel(s_adc, VCC_ADC_CHANNEL, &chan_cfg);
 }
 
-/* =========================================================
- * INICIALIZAÇÃO — GPIO BOTÃO (ISR)
- * ========================================================= */
+/* INICIALIZAÇÃO  GPIO BOTÃO  */
 
 static esp_err_t button_init(void)
 {
@@ -605,9 +581,7 @@ static esp_err_t button_init(void)
     return gpio_isr_handler_add(BUTTON_GPIO_PIN, gpio_isr_handler, NULL);
 }
 
-/* =========================================================
- * RTOS_INIT — ponto de entrada público
- * ========================================================= */
+/* RTOS_INIT */
 
 /**
  * @brief Inicializa todo o sistema DataLogger.
@@ -625,11 +599,9 @@ esp_err_t rtos_init(void)
 {
     esp_err_t err;
 
-    /* 1. SPIFFS */
     err = spiffs_init();
     if (err != ESP_OK) return err;
 
-    /* 2. Primitivos de sincronização */
     qLog = xQueueCreate(QLOG_LENGTH, sizeof(log_entry_t));
     if (qLog == NULL) {
         ESP_LOGE(TAG_MAIN, "Falha ao criar qLog");
@@ -642,14 +614,12 @@ esp_err_t rtos_init(void)
         return ESP_ERR_NO_MEM;
     }
 
-    /* 3. ADC */
     err = adc_init();
     if (err != ESP_OK) {
         ESP_LOGE(TAG_MAIN, "ADC init falhou: %s", esp_err_to_name(err));
         return err;
     }
 
-    /* 4. DHT11 */
     dht11_config_t dht_cfg = { .pin = DHT11_GPIO_PIN };
     err = dht11_init(&s_dht11, &dht_cfg);
     if (err != ESP_OK) {
@@ -657,14 +627,12 @@ esp_err_t rtos_init(void)
         return err;
     }
 
-    /* 5. Botão GPIO */
     err = button_init();
     if (err != ESP_OK) {
         ESP_LOGE(TAG_MAIN, "Botao GPIO init falhou: %s", esp_err_to_name(err));
         return err;
     }
 
-    /* 6. Tarefas — Logger primeiro para já estar pronto quando produtoras iniciarem */
     xTaskCreate(task_logger, "Task_Logger", 4096, NULL, 2, NULL);
     xTaskCreate(task_status, "Task_Status", 4096, NULL, 2, NULL);
     xTaskCreate(task_serial, "Task_Serial", 4096, NULL, 1, &h_task_serial);
